@@ -43,8 +43,8 @@ class GameServer:
         self.clients.append(client_socket)
         self.rounds_played[client_id] = 0  # Initialize rounds for the new player
 
-        print(f"Client {client_id} has connected.")
-        client_socket.send(f"Waiting for more players. Current players: {len(self.clients)}".encode("utf-8"))
+        print(f"Player {client_id} has connected.")
+        client_socket.send(f"Waiting for more players. You are Player {len(self.clients)}".encode("utf-8"))
 
         # Wait until enough players have joined
         while len(self.clients) < N_PLAYERS:
@@ -59,6 +59,7 @@ class GameServer:
                 if client_id == self.turn_index + 1:  # Adjust for 0-indexing
 
                     # Notify the current player that it's their turn
+                    client_socket.send(f"Guess {self.rounds_played[client_id] + 1}/{N_ROUNDS}: ".encode())
                     client_socket.send(b"Your turn to guess. Enter your 6-digit guess: ")
 
                     guess = client_socket.recv(1024).decode("utf-8").strip()
@@ -68,10 +69,10 @@ class GameServer:
                         continue
 
                     correct_value_correct_position, correct_value_incorrect_position = self.validate_guess(guess)
-                    response = f"\nClient {client_id} guessed: {correct_value_correct_position} {correct_value_incorrect_position} ({' '.join(list(guess))})"
+                    response = f"\nPlayer {client_id} guessed: {correct_value_correct_position} {correct_value_incorrect_position} ({' '.join(list(guess))})"
 
                     if correct_value_correct_position == 6:
-                        response += f"\** Client {client_id} guessed the code correctly! The code was {self.code}!!"
+                        response += f"\n** Player {client_id} guessed the code correctly! The code was {self.code}! **"
                         self.notify_clients(response)
                         self.cleanup_game()
                         break  # End the client loop
@@ -131,7 +132,7 @@ def main():
     server.bind((SERVER_IP, int(SERVER_PORT)))
     server.listen(5)
     print(f"Server listening on port {SERVER_PORT}")
-    print("Total rounds: {N_ROUNDS}, Total players: {N_PLAYERS}")
+    print(f"Total rounds: {N_ROUNDS}, Total players: {N_PLAYERS}")
 
     game_server = GameServer()
 
