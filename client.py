@@ -5,13 +5,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-server_ip = os.getenv("SERVER_IP", None)
-server_port = os.getenv("SERVER_PORT", None)
+SERVER_IP = os.getenv("SERVER_IP", None)
+SERVER_PORT = int(os.getenv("SERVER_PORT", None))
 
 
 def main():
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect((server_ip, server_port))
+    client.connect((SERVER_IP, SERVER_PORT))
 
     while True:
         response = client.recv(1024).decode("utf-8")
